@@ -7,7 +7,8 @@ from bs4 import BeautifulSoup
 PUBLIC_SITEMAP_URL = "https://public.fr/sitemap_index.xml"
 VSD_SITEMAP_URL = "https://vsd.fr/sitemap_index.xml"
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"
+    + "Chrome/112.0.0.0 Safari/537.36"
 }
 
 
