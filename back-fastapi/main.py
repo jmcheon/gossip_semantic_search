@@ -8,6 +8,27 @@ from .app.search import generate_embedding, search_links
 
 app = FastAPI()
 
+
+# List of allowed origins
+origins = [
+    "http://localhost:3000",
+    "http://localhost:8501",
+]
+
+
+def add(app: FastAPI):
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],  # Allows all HTTP methods
+        allow_headers=["*"],  # Allows all headers
+    )
+
+
+add(app)
+
+
 class QueryResquest(BaseModel):
     query: str
     top_k: int
