@@ -3,17 +3,15 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from sentence_transformers import SentenceTransformer
 
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
+from ..dependencies import model
+
+DATA_DIR = Path(__file__).parent.parent.parent.parent / "data"
 feed_csv_path = DATA_DIR / "feeds.csv"
 feed_embeddings_path = DATA_DIR / "feed_embeddings.npy"
 
 csv_path = DATA_DIR / "links_metadata.csv"
 embeddings_path = DATA_DIR / "embeddings.npy"
-
-# Sentence Transformer model
-model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Load the feed embeddings and corresponding links
 feed_df = pd.read_csv(feed_csv_path)
