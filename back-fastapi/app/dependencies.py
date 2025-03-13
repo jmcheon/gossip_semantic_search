@@ -1,10 +1,12 @@
+import torch
 from pinecone import Pinecone, ServerlessSpec
 from sentence_transformers import SentenceTransformer
 
 from .config import settings
 
 # Sentence Transformer model
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", device=device)
 
 # Initialize Poincone
 pc = Pinecone(api_key=settings.PINECONE_API_KEY)

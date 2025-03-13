@@ -1,7 +1,6 @@
+from app.controllers import embedding_controller, search_controller
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from .app.controllers import search_controller
 
 app = FastAPI()
 
@@ -26,3 +25,4 @@ def add(app: FastAPI):
 add(app)
 
 app.include_router(search_controller.router)
+app.include_router(embedding_controller.router)

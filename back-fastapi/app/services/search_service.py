@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 
 from ..dependencies import model
+from .embedding_service import upsert_to_pinecone
+from ..dependencies import index
 
 DATA_DIR = Path(__file__).parent.parent.parent.parent / "data"
 feed_csv_path = DATA_DIR / "feeds.csv"
@@ -17,11 +19,19 @@ embeddings_path = DATA_DIR / "embeddings.npy"
 feed_df = pd.read_csv(feed_csv_path)
 feed_links = feed_df["Link"].tolist()
 feed_embeddings = np.load(feed_embeddings_path)
+metadata = [{"text": text} for text in feed_df["Description"].tolist()]
+# print("start upserting feed embeddings")
+# msg = upsert_to_pinecone(feed_embeddings, metadata, namespace="feeds")
+# print(msg)
 
 # Load the link embeddings and corresponding links
 df = pd.read_csv(csv_path)
 links = df["link"].tolist()
 embeddings = np.load(embeddings_path)
+metadata = [{"text": text} for text in df["processed_text"].tolist()]
+# print("start upserting link embeddings")
+# msg = upsert_to_pinecone(embeddings, metadata, namespace="links")
+# print(msg)
 
 
 def generate_embedding(query: str) -> np.ndarray:

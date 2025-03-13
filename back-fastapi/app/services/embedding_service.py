@@ -4,8 +4,8 @@ from urllib.parse import urlparse
 
 import numpy as np
 import pandas as pd
-import torch
-from sentence_transformers import SentenceTransformer
+
+from ..dependencies import index
 
 
 def preprocess_link(link):
@@ -61,6 +61,17 @@ def build_embedding(
     return embeddings
 
 
+def upsert_to_pinecone(embeddings, metadata_list, namespace="default", batch_size=200):
+    """
+    Upsert embeddings to Pinecone with metadata
+    """
+    vectors = [(str(i), embeddings[i], metadata_list[i]) for i in range(len(embeddings))]
+    for i in range(0, len(vectors), batch_size):
+        batch = vectors[i : i + batch_size]
+        index.upsert(vectors=batch, namespace=namespace)
+    return {"message": f"{len(embeddings)} {namespace} embeddings upserted to pinecone"}
+
+
 def generate_link_embeddings(model, device):
     # Load and preprocess the links
     df = pd.read_csv("./data/links.csv")
@@ -76,10 +87,13 @@ def generate_link_embeddings(model, device):
         df["processed_text"], model, batch_size=128, device=device, checkpoint_dir=checkpoint_dir
     )
 
-    # Save embeddings
-    np.save("./data/embeddings.npy", embeddings)
-    df.to_csv("./data/links_metadata.csv", index=False)
-    print("Embeddings are generated and saved")
+    metadata = [{"text": text} for text in df["processed_text"].tolist()]
+
+    # # Save embeddings
+    # np.save("./data/embeddings.npy", embeddings)
+    # df.to_csv("./data/links_metadata.csv", index=False)
+    # print("Embeddings are generated and saved")
+    return upsert_to_pinecone(embeddings, metadata, namespace="links")
 
 
 def generate_feed_embeddings(model, device):
@@ -88,22 +102,14 @@ def generate_feed_embeddings(model, device):
     df.drop_duplicates(inplace=True)
 
     # Generate embeddings
-    checkpoint_dir = "checkpoints"
+    checkpoint_dir = "feed_checkpoints"
     embeddings = build_embedding(
         df["Description"], model, batch_size=128, device=device, checkpoint_dir=checkpoint_dir
     )
 
-    # Save embeddings
-    np.save("./data/feed_embeddings.npy", embeddings)
-    print("Embeddings are generated and saved")
+    metadata = [{"text": text} for text in df["Description"].tolist()]
 
-
-if __name__ == "__main__":
-    # Load the model
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"device: {device}")
-
-    model = SentenceTransformer("all-MiniLM-L6-v2", device=device)
-
-    generate_feed_embeddings(model, device)
-    generate_link_embeddings(model, device)
+    # # Save embeddings
+    # np.save("./data/feed_embeddings.npy", embeddings)
+    # print("Embeddings are generated and saved")
+    return upsert_to_pinecone(embeddings, metadata, namespace="feeds")
