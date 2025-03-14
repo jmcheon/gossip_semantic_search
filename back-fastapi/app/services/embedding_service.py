@@ -65,7 +65,7 @@ def upsert_to_pinecone(embeddings, metadata_list, namespace="default", batch_siz
     """
     Upsert embeddings to Pinecone with metadata
     """
-    vectors = [(str(i), embeddings[i], metadata_list[i]) for i in range(len(embeddings))]
+    vectors = [(str(i), embeddings[i].tolist(), metadata_list[i]) for i in range(len(embeddings))]
     for i in range(0, len(vectors), batch_size):
         batch = vectors[i : i + batch_size]
         index.upsert(vectors=batch, namespace=namespace)
@@ -84,10 +84,16 @@ def generate_link_embeddings(model, device):
     # Generate embeddings
     checkpoint_dir = "checkpoints"
     embeddings = build_embedding(
-        df["processed_text"], model, batch_size=128, device=device, checkpoint_dir=checkpoint_dir
+        df["processed_text"].tolist(),
+        model,
+        batch_size=128,
+        device=device,
+        checkpoint_dir=checkpoint_dir,
     )
 
-    metadata = [{"text": text} for text in df["processed_text"].tolist()]
+    metadata = [
+        {"text": text, "link": link} for text, link in zip(df["processed_text"], df["link"])
+    ]
 
     # # Save embeddings
     # np.save("./data/embeddings.npy", embeddings)
@@ -104,10 +110,14 @@ def generate_feed_embeddings(model, device):
     # Generate embeddings
     checkpoint_dir = "feed_checkpoints"
     embeddings = build_embedding(
-        df["Description"], model, batch_size=128, device=device, checkpoint_dir=checkpoint_dir
+        df["Description"].tolist(),
+        model,
+        batch_size=128,
+        device=device,
+        checkpoint_dir=checkpoint_dir,
     )
 
-    metadata = [{"text": text} for text in df["Description"].tolist()]
+    metadata = [{"text": text, "link": link} for text, link in zip(df["Description"], df["Link"])]
 
     # # Save embeddings
     # np.save("./data/feed_embeddings.npy", embeddings)
